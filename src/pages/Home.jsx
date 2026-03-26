@@ -53,7 +53,7 @@ export default function Home() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
 
   const getCartWhatsAppUrl = () => {
-    const phoneNumber = "7054298068"
+    const phoneNumber = "7029858210"
     let textMessage = lang === 'kz' ? "Сәлеметсіз бе! Менің тапсырысым:\n\n" : "Здравствуйте! Мой заказ:\n\n"
     cart.forEach((item, index) => {
       textMessage += `${index + 1}) ${item.brand ? item.brand + ' ' : ''}${item.name} (${item.volume} мл) - ${item.quantity} шт x ${item.price.toLocaleString('kk-KZ')} ₸\n`
