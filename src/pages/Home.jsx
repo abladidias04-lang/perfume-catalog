@@ -63,7 +63,7 @@ export default function Home() {
   }
 
   const getSingleWhatsAppUrl = (perfume) => {
-    const phoneNumber = "7054298068"
+    const phoneNumber = "7029858210"
     const textMessage = lang === 'kz' 
       ? `Сәлеметсіз бе! Маған мына парфюм ұнады:\n\n*Бренд:* ${perfume.brand || '-'}\n*Атауы:* ${perfume.name}\n*Көлемі:* ${perfume.volume} мл\n*Бағасы:* ${perfume.price.toLocaleString('kk-KZ')} ₸\n\nТапсырыс бергім келеді.`
       : `Здравствуйте! Мне понравился этот парфюм:\n\n*Бренд:* ${perfume.brand || '-'}\n*Название:* ${perfume.name}\n*Объем:* ${perfume.volume} мл\n*Цена:* ${perfume.price.toLocaleString('kk-KZ')} ₸\n\nХочу сделать заказ.`
