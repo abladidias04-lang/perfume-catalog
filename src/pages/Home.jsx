@@ -24,7 +24,7 @@ export default function Home() {
     setLoading(false)
   }
 
-  // --- СЕБЕТ ФУНКЦИЯЛАРЫ ---
+// --- СЕБЕТ ФУНКЦИЯЛАРЫ ---
   const addToCart = (perfume) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === perfume.id)
@@ -33,7 +33,7 @@ export default function Home() {
       }
       return [...prev, { ...perfume, quantity: 1 }]
     })
-    setIsCartOpen(true) // Қосқан кезде себетті ашып көрсетеміз
+    // Осы жерде тұрған setIsCartOpen(true) деген жол өшірілді!
   }
 
   const removeFromCart = (id) => {
