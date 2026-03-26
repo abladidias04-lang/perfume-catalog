@@ -12,7 +12,7 @@ export default function Navbar({ searchQuery, setSearchQuery, cartCount, onOpenC
           
           <div className="flex-shrink-0 w-full sm:w-auto flex justify-between items-center">
             <span className="text-2xl font-black tracking-tighter text-gray-900">
-              AURA<span className="text-indigo-600">.</span>
+              AKYLZHANPARFUM<span className="text-indigo-600">.</span>
             </span>
             
             {/* ТІЛ АУЫСТЫРУ БАТЫРМАЛАРЫ */}
