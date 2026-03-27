@@ -2,7 +2,6 @@ import { Search } from 'lucide-react'
 import { translations } from '../translations'
 
 export default function Navbar({ searchQuery, setSearchQuery, cartCount, onOpenCart, lang, setLang }) {
-  // Қазіргі таңдалған тілдің сөздігін аламыз (мысалы, translations['kz'])
   const t = translations[lang] 
 
   return (
@@ -11,11 +10,11 @@ export default function Navbar({ searchQuery, setSearchQuery, cartCount, onOpenC
         <div className="flex flex-col sm:flex-row justify-between items-center py-3 sm:h-16 gap-3 sm:gap-0">
           
           <div className="flex-shrink-0 w-full sm:w-auto flex justify-between items-center">
+            {/* ЖӨНДЕЛГЕН ЖЕР: Көк нүкте алынып тасталды */}
             <span className="text-2xl font-black tracking-tighter text-gray-900">
-              by GULNAZ INAYATULLA<span className="text-indigo-600">.</span>
+              by GULNAZ INAYATULLA
             </span>
             
-            {/* ТІЛ АУЫСТЫРУ БАТЫРМАЛАРЫ */}
             <div className="flex bg-gray-100 p-1 rounded-lg sm:ml-6">
               <button 
                 onClick={() => setLang('kz')}

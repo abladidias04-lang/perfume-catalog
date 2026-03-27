@@ -14,7 +14,6 @@ export default function AdminLogin() {
     setLoading(true)
     setError(null)
 
-    // Supabase арқылы логин жасау
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -24,7 +23,7 @@ export default function AdminLogin() {
       setError('Қате: Логин немесе құпия сөз дұрыс емес!')
       setLoading(false)
     } else {
-      navigate('/admin/dashboard') // Сәтті кірсе, админ панельге жібереміз
+      navigate('/admin/dashboard')
     }
   }
 
@@ -32,7 +31,7 @@ export default function AdminLogin() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-black text-gray-900">
-          by GULNAZ INAYATULLA<span className="text-indigo-600">.</span> Админ
+          by GULNAZ INAYATULLA Админ {/* ЖӨНДЕЛГЕН ЖЕР */}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Тек әкімшілерге арналған құпия бөлім
