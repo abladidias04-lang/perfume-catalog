@@ -131,10 +131,12 @@ export default function AdminDashboard() {
     }
   }
 
+  // ЖАҢА АҚЫЛДЫ ІЗДЕУ ЖҮЙЕСІ (Админ панель үшін)
   const filteredPerfumes = perfumes.filter(p => {
-    const searchLower = searchQuery.toLowerCase();
-    return p.name.toLowerCase().includes(searchLower) || 
-           (p.brand && p.brand.toLowerCase().includes(searchLower));
+    const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean);
+    const searchableText = `${p.brand || ''} ${p.name || ''} ${p.description || ''}`.toLowerCase();
+    
+    return searchTerms.every(term => searchableText.includes(term));
   });
 
   const sortedPerfumes = [...filteredPerfumes].sort((a, b) => {
@@ -195,7 +197,6 @@ export default function AdminDashboard() {
             sortedPerfumes.map(p => (
               <div key={p.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:shadow-md transition-shadow">
                 
-                {/* ЖӨНДЕЛГЕН ЖЕР: w-full орнына flex-1 және min-w-0 қосылды */}
                 <div className="flex items-center gap-4 flex-1 min-w-0 w-full sm:w-auto">
                   <img src={p.image_url} alt={p.name} className="w-16 h-16 object-cover rounded-lg bg-gray-100 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
@@ -205,7 +206,6 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 
-                {/* ЖӨНДЕЛГЕН ЖЕР: flex-shrink-0 қосылды, батырмалар қысылып сыртқа шықпайды */}
                 <div className="flex gap-2 w-full sm:w-auto justify-end flex-shrink-0">
                   <button 
                     onClick={() => handleEdit(p)} 

@@ -23,8 +23,9 @@ export const translations = {
     sortAlphabetical: "Алфавит бойынша (A-Z)",
     sortCheap: "Алдымен арзандары",
     sortExpensive: "Алдымен қымбаттары",
-    // ЖАҢА ҚОСЫЛҒАН АУДАРМА
-    similarProducts: "Сізге мыналар да ұнауы мүмкін"
+    similarProducts: "Сізге мыналар да ұнауы мүмкін",
+    // ЖАҢА АУДАРМА
+    loadMore: "Тағы көрсету"
   },
   ru: {
     search: "Поиск парфюма или бренда...",
@@ -50,7 +51,8 @@ export const translations = {
     sortAlphabetical: "По алфавиту (A-Z)",
     sortCheap: "Сначала дешевые",
     sortExpensive: "Сначала дорогие",
-    // ЖАҢА ҚОСЫЛҒАН АУДАРМА
-    similarProducts: "Вам также может понравиться"
+    similarProducts: "Вам также может понравиться",
+    // ЖАҢА АУДАРМА
+    loadMore: "Показать еще"
   }
 }

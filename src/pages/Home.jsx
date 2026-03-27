@@ -19,11 +19,16 @@ export default function Home() {
   
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(20)
 
   const [lang, setLang] = useState('kz')
   const t = translations[lang]
 
   useEffect(() => { fetchPerfumes() }, [])
+
+  useEffect(() => {
+    setVisibleCount(20)
+  }, [searchQuery, selectedBrands, selectedVolumes, priceFilter, sortBy])
 
   async function fetchPerfumes() {
     const { data } = await supabase.from('perfumes').select('*').order('created_at', { ascending: false })
@@ -93,15 +98,20 @@ export default function Home() {
   const hasActiveFilters = selectedBrands.length > 0 || selectedVolumes.length > 0 || priceFilter !== 'all'
 
   const filteredPerfumes = perfumes.filter(perfume => {
-    const searchLower = searchQuery.toLowerCase()
-    const matchesSearch = 
-      perfume.name.toLowerCase().includes(searchLower) || 
-      (perfume.brand && perfume.brand.toLowerCase().includes(searchLower))
+    // ЖАҢА АҚЫЛДЫ ІЗДЕУ ЖҮЙЕСІ:
+    // Сұранысты сөздерге бөлеміз (мысалы, "Louis Vuitton" -> ["louis", "vuitton"])
+    const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean)
+    // Парфюмнің брендін, атын және сипаттамасын бір мәтінге біріктіреміз
+    const searchableText = `${perfume.brand || ''} ${perfume.name || ''} ${perfume.description || ''}`.toLowerCase()
     
+    // Барлық іздеген сөздер осы мәтін ішінен табылуы шарт
+    const matchesSearch = searchTerms.every(term => searchableText.includes(term))
+    
+    // ЖАҢА БАҒА ФИЛЬТРЛЕРІ:
     let matchesPrice = true
-    if (priceFilter === 'budget') matchesPrice = perfume.price <= 50000
-    if (priceFilter === 'medium') matchesPrice = perfume.price > 50000 && perfume.price <= 100000
-    if (priceFilter === 'premium') matchesPrice = perfume.price > 100000
+    if (priceFilter === 'range1') matchesPrice = perfume.price >= 7000 && perfume.price <= 9800
+    if (priceFilter === 'range2') matchesPrice = perfume.price >= 9800 && perfume.price <= 13600
+    if (priceFilter === 'range3') matchesPrice = perfume.price >= 15400 && perfume.price <= 21500
     
     let matchesVolume = true
     if (selectedVolumes.length > 0) matchesVolume = selectedVolumes.includes(perfume.volume)
@@ -115,13 +125,13 @@ export default function Home() {
   const sortedPerfumes = [...filteredPerfumes].sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
-    
     const nameA = a.name.toLowerCase();
     const nameB = b.name.toLowerCase();
     return nameA.localeCompare(nameB);
   })
 
-  // ЖАҢА: ҰҚСАС ТАУАРЛАРДЫ ТАБУ (Максимум 3 тауар)
+  const displayedPerfumes = sortedPerfumes.slice(0, visibleCount)
+
   const similarPerfumes = selectedPerfume 
     ? perfumes.filter(p => p.brand === selectedPerfume.brand && p.id !== selectedPerfume.id).slice(0, 3)
     : [];
@@ -139,7 +149,6 @@ export default function Home() {
       
       <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full mt-4 sm:mt-8 flex flex-col md:flex-row gap-6 items-start">
         
-        {/* МОБИЛЬДІ ТАҚЫРЫП ЖӘНЕ ФИЛЬТР БАТЫРМАСЫ */}
         <div className="w-full md:hidden flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-black">{t.catalog} <span className="text-sm text-gray-500 font-medium ml-1">({sortedPerfumes.length})</span></h1>
@@ -162,7 +171,6 @@ export default function Home() {
           </select>
         </div>
 
-        {/* SIDEBAR ФИЛЬТР */}
         <aside className={`fixed inset-0 z-50 bg-white md:bg-transparent md:static md:z-auto w-full md:w-64 flex-shrink-0 transition-transform ${isFilterMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
           <div className="h-full md:h-auto overflow-y-auto bg-white md:rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-6 md:sticky md:top-24">
             
@@ -205,9 +213,9 @@ export default function Home() {
               <div className="flex flex-col gap-2.5">
                 {[
                   { id: 'all', label: t.all },
-                  { id: 'budget', label: t.budget },
-                  { id: 'medium', label: t.medium },
-                  { id: 'premium', label: t.premium }
+                  { id: 'range1', label: t.range1 },
+                  { id: 'range2', label: t.range2 },
+                  { id: 'range3', label: t.range3 }
                 ].map(opt => (
                   <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
                     <input 
@@ -252,7 +260,6 @@ export default function Home() {
           </div>
         </aside>
 
-        {/* НЕГІЗГІ КАТАЛОГ БӨЛІМІ */}
         <div className="flex-1 w-full">
           <div className="hidden md:flex bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 justify-between items-center">
             <h1 className="text-2xl font-black">{t.catalog} <span className="text-sm text-gray-500 font-medium ml-2">({sortedPerfumes.length} {lang === 'kz' ? 'тауар' : 'товаров'})</span></h1>
@@ -273,18 +280,45 @@ export default function Home() {
 
           <div>
             {loading ? (
-              <div className="text-center py-20 text-gray-500 font-medium">{t.loading}</div>
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                {[...Array(8)].map((_, index) => (
+                  <div key={index} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full animate-pulse">
+                    <div className="aspect-[4/5] bg-gray-200"></div>
+                    <div className="p-3 sm:p-4 flex flex-col flex-grow">
+                      <div className="h-3 bg-gray-200 rounded-full w-1/3 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded-full w-3/4 mb-3"></div>
+                      <div className="h-3 bg-gray-200 rounded-full w-1/4 mb-4"></div>
+                      <div className="mt-auto">
+                        <div className="h-6 bg-gray-200 rounded-full w-1/2"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : sortedPerfumes.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm font-medium text-gray-500">
                 {t.empty} <br/> 
                 <button onClick={clearFilters} className="mt-3 text-indigo-600 hover:underline font-bold">{lang === 'kz' ? 'Сүзгілерді тазарту' : 'Сбросить фильтры'}</button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                {sortedPerfumes.map(perfume => (
-                  <PerfumeCard key={perfume.id} perfume={perfume} onClick={() => setSelectedPerfume(perfume)} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                  {displayedPerfumes.map(perfume => (
+                    <PerfumeCard key={perfume.id} perfume={perfume} onClick={() => setSelectedPerfume(perfume)} />
+                  ))}
+                </div>
+
+                {visibleCount < sortedPerfumes.length && (
+                  <div className="mt-8 flex justify-center">
+                    <button 
+                      onClick={() => setVisibleCount(prev => prev + 20)}
+                      className="bg-white border border-gray-200 text-indigo-600 font-bold py-3.5 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                      {t.loadMore}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -311,7 +345,6 @@ export default function Home() {
                 <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{selectedPerfume.description || t.empty}</p>
               </div>
               
-              {/* ЖАҢА: ҰҚСАС ТАУАРЛАР БЛОГЫ */}
               {similarPerfumes.length > 0 && (
                 <div className="mb-8">
                   <h4 className="font-bold text-gray-900 mb-4 uppercase tracking-wider text-sm">{t.similarProducts}</h4>
