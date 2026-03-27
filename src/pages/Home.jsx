@@ -2,21 +2,24 @@ import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import PerfumeCard from '../components/PerfumeCard'
 import { supabase } from '../lib/supabase'
-import { translations } from '../translations' // Сөздікті шақырамыз
+import { translations } from '../translations'
 
 export default function Home() {
   const [perfumes, setPerfumes] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  
+  const [selectedBrands, setSelectedBrands] = useState([])
+  const [selectedVolumes, setSelectedVolumes] = useState([])
   const [priceFilter, setPriceFilter] = useState('all')
-  const [volumeFilter, setVolumeFilter] = useState('all')
-  const [brandFilter, setBrandFilter] = useState('all')
+  
+  const [sortBy, setSortBy] = useState('alphabetical')
+  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false)
   const [selectedPerfume, setSelectedPerfume] = useState(null)
   
   const [cart, setCart] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
 
-  // Тіл стейті (Бастапқыда қазақша)
   const [lang, setLang] = useState('kz')
   const t = translations[lang]
 
@@ -73,18 +76,55 @@ export default function Home() {
   const availableVolumes = [...new Set(perfumes.map(p => p.volume))].sort((a, b) => a - b)
   const availableBrands = [...new Set(perfumes.map(p => p.brand).filter(Boolean))]
 
+  const toggleBrand = (brand) => {
+    setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand])
+  }
+
+  const toggleVolume = (vol) => {
+    setSelectedVolumes(prev => prev.includes(vol) ? prev.filter(v => v !== vol) : [...prev, vol])
+  }
+
+  const clearFilters = () => {
+    setSelectedBrands([])
+    setSelectedVolumes([])
+    setPriceFilter('all')
+  }
+
+  const hasActiveFilters = selectedBrands.length > 0 || selectedVolumes.length > 0 || priceFilter !== 'all'
+
   const filteredPerfumes = perfumes.filter(perfume => {
-    const matchesSearch = perfume.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const searchLower = searchQuery.toLowerCase()
+    const matchesSearch = 
+      perfume.name.toLowerCase().includes(searchLower) || 
+      (perfume.brand && perfume.brand.toLowerCase().includes(searchLower))
+    
     let matchesPrice = true
     if (priceFilter === 'budget') matchesPrice = perfume.price <= 50000
     if (priceFilter === 'medium') matchesPrice = perfume.price > 50000 && perfume.price <= 100000
     if (priceFilter === 'premium') matchesPrice = perfume.price > 100000
+    
     let matchesVolume = true
-    if (volumeFilter !== 'all') matchesVolume = perfume.volume === parseInt(volumeFilter)
+    if (selectedVolumes.length > 0) matchesVolume = selectedVolumes.includes(perfume.volume)
+    
     let matchesBrand = true
-    if (brandFilter !== 'all') matchesBrand = perfume.brand === brandFilter
+    if (selectedBrands.length > 0) matchesBrand = selectedBrands.includes(perfume.brand)
+    
     return matchesSearch && matchesPrice && matchesVolume && matchesBrand
   })
+
+  const sortedPerfumes = [...filteredPerfumes].sort((a, b) => {
+    if (sortBy === 'price-asc') return a.price - b.price;
+    if (sortBy === 'price-desc') return b.price - a.price;
+    
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
+    return nameA.localeCompare(nameB);
+  })
+
+  // ЖАҢА: ҰҚСАС ТАУАРЛАРДЫ ТАБУ (Максимум 3 тауар)
+  const similarPerfumes = selectedPerfume 
+    ? perfumes.filter(p => p.brand === selectedPerfume.brand && p.id !== selectedPerfume.id).slice(0, 3)
+    : [];
 
   return (
     <div className="min-h-screen flex flex-col pb-20 bg-gray-50 relative">
@@ -97,59 +137,156 @@ export default function Home() {
         setLang={setLang}
       />
       
-      <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full mt-4 sm:mt-8 flex flex-col gap-6">
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-5">
-          <h1 className="text-2xl sm:text-3xl font-black">{t.catalog} <span className="text-sm text-gray-500 font-medium ml-2">({filteredPerfumes.length})</span></h1>
-          <div className="flex flex-col gap-4">
+      <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full mt-4 sm:mt-8 flex flex-col md:flex-row gap-6 items-start">
+        
+        {/* МОБИЛЬДІ ТАҚЫРЫП ЖӘНЕ ФИЛЬТР БАТЫРМАСЫ */}
+        <div className="w-full md:hidden flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-black">{t.catalog} <span className="text-sm text-gray-500 font-medium ml-1">({sortedPerfumes.length})</span></h1>
+            <button 
+              onClick={() => setIsFilterMobileOpen(true)}
+              className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl text-sm font-bold"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+              {lang === 'kz' ? 'Фильтр' : 'Фильтры'}
+            </button>
+          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block w-full p-2.5 outline-none font-medium"
+          >
+            <option value="alphabetical">{t.sortAlphabetical}</option>
+            <option value="price-asc">{t.sortCheap}</option>
+            <option value="price-desc">{t.sortExpensive}</option>
+          </select>
+        </div>
+
+        {/* SIDEBAR ФИЛЬТР */}
+        <aside className={`fixed inset-0 z-50 bg-white md:bg-transparent md:static md:z-auto w-full md:w-64 flex-shrink-0 transition-transform ${isFilterMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          <div className="h-full md:h-auto overflow-y-auto bg-white md:rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-6 md:sticky md:top-24">
             
+            <div className="flex justify-between items-center md:hidden mb-2">
+              <h2 className="text-xl font-black">{lang === 'kz' ? 'Фильтрлер' : 'Фильтры'}</h2>
+              <button onClick={() => setIsFilterMobileOpen(false)} className="bg-gray-100 p-2 rounded-full">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="text-sm font-bold text-red-500 bg-red-50 py-2 rounded-lg hover:bg-red-100 transition-colors">
+                {lang === 'kz' ? 'Сүзгіні тазарту' : 'Сбросить фильтры'}
+              </button>
+            )}
+
             {availableBrands.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-bold text-gray-400 uppercase">{t.brand}</span>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => setBrandFilter('all')} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${brandFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-600'}`}>{t.all}</button>
+              <div>
+                <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wider text-xs">{t.brand}</h3>
+                <div className="flex flex-col gap-2.5 max-h-56 overflow-y-auto pr-2 scrollbar-thin">
                   {availableBrands.map(brand => (
-                    <button key={brand} onClick={() => setBrandFilter(brand)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${brandFilter === brand ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-600'}`}>{brand}</button>
+                    <label key={brand} className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedBrands.includes(brand)}
+                        onChange={() => toggleBrand(brand)}
+                        className="w-4.5 h-4.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer"
+                      />
+                      <span className={`text-sm ${selectedBrands.includes(brand) ? 'font-bold text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>{brand}</span>
+                    </label>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-bold text-gray-400 uppercase">{t.price}</span>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => setPriceFilter('all')} className={`px-4 py-2 rounded-xl text-sm font-medium ${priceFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-600'}`}>{t.all}</button>
-                <button onClick={() => setPriceFilter('budget')} className={`px-4 py-2 rounded-xl text-sm font-medium ${priceFilter === 'budget' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-600'}`}>{t.budget}</button>
-                <button onClick={() => setPriceFilter('medium')} className={`px-4 py-2 rounded-xl text-sm font-medium ${priceFilter === 'medium' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-600'}`}>{t.medium}</button>
-                <button onClick={() => setPriceFilter('premium')} className={`px-4 py-2 rounded-xl text-sm font-medium ${priceFilter === 'premium' ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-600'}`}>{t.premium}</button>
+            <hr className="border-gray-100" />
+
+            <div>
+              <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wider text-xs">{t.price}</h3>
+              <div className="flex flex-col gap-2.5">
+                {[
+                  { id: 'all', label: t.all },
+                  { id: 'budget', label: t.budget },
+                  { id: 'medium', label: t.medium },
+                  { id: 'premium', label: t.premium }
+                ].map(opt => (
+                  <label key={opt.id} className="flex items-center gap-3 cursor-pointer group">
+                    <input 
+                      type="radio" 
+                      name="price"
+                      checked={priceFilter === opt.id}
+                      onChange={() => setPriceFilter(opt.id)}
+                      className="w-4.5 h-4.5 border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <span className={`text-sm ${priceFilter === opt.id ? 'font-bold text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>{opt.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
-            
+
+            <hr className="border-gray-100" />
+
             {availableVolumes.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-bold text-gray-400 uppercase">{t.volume}</span>
-                <div className="flex flex-wrap gap-2">
-                  <button onClick={() => setVolumeFilter('all')} className={`px-4 py-2 rounded-xl text-sm font-medium ${volumeFilter === 'all' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600'}`}>{t.any}</button>
+              <div className="pb-6 md:pb-0">
+                <h3 className="font-bold text-gray-900 mb-3 uppercase tracking-wider text-xs">{t.volume}</h3>
+                <div className="flex flex-col gap-2.5 max-h-48 overflow-y-auto pr-2 scrollbar-thin">
                   {availableVolumes.map(vol => (
-                    <button key={vol} onClick={() => setVolumeFilter(vol)} className={`px-4 py-2 rounded-xl text-sm font-medium ${volumeFilter === vol ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-600'}`}>{vol} мл</button>
+                    <label key={vol} className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedVolumes.includes(vol)}
+                        onChange={() => toggleVolume(vol)}
+                        className="w-4.5 h-4.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <span className={`text-sm ${selectedVolumes.includes(vol) ? 'font-bold text-gray-900' : 'text-gray-600 group-hover:text-gray-900'}`}>{vol} мл</span>
+                    </label>
                   ))}
                 </div>
+              </div>
+            )}
+
+            <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white pt-4 pb-2 border-t border-gray-100 mt-auto">
+               <button onClick={() => setIsFilterMobileOpen(false)} className="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md">
+                 {lang === 'kz' ? `Көрсету (${sortedPerfumes.length})` : `Показать (${sortedPerfumes.length})`}
+               </button>
+            </div>
+          </div>
+        </aside>
+
+        {/* НЕГІЗГІ КАТАЛОГ БӨЛІМІ */}
+        <div className="flex-1 w-full">
+          <div className="hidden md:flex bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 justify-between items-center">
+            <h1 className="text-2xl font-black">{t.catalog} <span className="text-sm text-gray-500 font-medium ml-2">({sortedPerfumes.length} {lang === 'kz' ? 'тауар' : 'товаров'})</span></h1>
+            
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-500">{lang === 'kz' ? 'Сұрыптау:' : 'Сортировка:'}</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block p-2.5 outline-none font-medium cursor-pointer"
+              >
+                <option value="alphabetical">{t.sortAlphabetical}</option>
+                <option value="price-asc">{t.sortCheap}</option>
+                <option value="price-desc">{t.sortExpensive}</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            {loading ? (
+              <div className="text-center py-20 text-gray-500 font-medium">{t.loading}</div>
+            ) : sortedPerfumes.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm font-medium text-gray-500">
+                {t.empty} <br/> 
+                <button onClick={clearFilters} className="mt-3 text-indigo-600 hover:underline font-bold">{lang === 'kz' ? 'Сүзгілерді тазарту' : 'Сбросить фильтры'}</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                {sortedPerfumes.map(perfume => (
+                  <PerfumeCard key={perfume.id} perfume={perfume} onClick={() => setSelectedPerfume(perfume)} />
+                ))}
               </div>
             )}
           </div>
-        </div>
-
-        <div>
-          {loading ? (
-            <div className="text-center py-20 text-gray-500">{t.loading}</div>
-          ) : filteredPerfumes.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">{t.empty}</div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
-              {filteredPerfumes.map(perfume => (
-                <PerfumeCard key={perfume.id} perfume={perfume} onClick={() => setSelectedPerfume(perfume)} onAddToCart={addToCart} />
-              ))}
-            </div>
-          )}
         </div>
       </main>
 
@@ -168,10 +305,33 @@ export default function Home() {
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-2">{selectedPerfume.name}</h2>
               <p className="text-gray-500 mb-6 font-medium">{selectedPerfume.volume} мл</p>
               <p className="text-3xl font-black text-indigo-600 mb-8">{selectedPerfume.price.toLocaleString('kk-KZ')} ₸</p>
-              <div className="mb-8">
+              
+              <div className="mb-6">
                 <h4 className="font-bold text-gray-900 mb-3 uppercase tracking-wider text-sm">{t.description}</h4>
                 <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">{selectedPerfume.description || t.empty}</p>
               </div>
+              
+              {/* ЖАҢА: ҰҚСАС ТАУАРЛАР БЛОГЫ */}
+              {similarPerfumes.length > 0 && (
+                <div className="mb-8">
+                  <h4 className="font-bold text-gray-900 mb-4 uppercase tracking-wider text-sm">{t.similarProducts}</h4>
+                  <div className="grid grid-cols-3 gap-3">
+                    {similarPerfumes.map(sim => (
+                      <div 
+                        key={sim.id} 
+                        onClick={() => setSelectedPerfume(sim)} 
+                        className="cursor-pointer group flex flex-col"
+                      >
+                        <div className="aspect-[4/5] rounded-xl overflow-hidden bg-gray-50 mb-2">
+                          <img src={sim.image_url} alt={sim.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        </div>
+                        <p className="text-xs font-bold text-gray-900 truncate">{sim.name}</p>
+                        <p className="text-[10px] text-indigo-600 font-bold">{sim.price.toLocaleString('kk-KZ')} ₸</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               
               <div className="mt-auto pt-6 border-t border-gray-100 flex gap-3">
                 <button onClick={() => { addToCart(selectedPerfume); setSelectedPerfume(null); }} className="w-1/2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-sm sm:text-base font-bold py-4 rounded-xl transition-all">

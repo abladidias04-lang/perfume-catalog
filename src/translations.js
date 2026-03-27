@@ -1,6 +1,6 @@
 export const translations = {
   kz: {
-    search: "Парфюм іздеу...",
+    search: "Парфюм немесе бренд іздеу...",
     catalog: "Каталог",
     price: "Бағасы:",
     volume: "Көлемі:",
@@ -19,10 +19,15 @@ export const translations = {
     cartEmpty: "Себетіңіз әзірге бос",
     total: "Жалпы сома:",
     checkout: "Тапсырыс беру",
-    delete: "Өшіру"
+    delete: "Өшіру",
+    sortAlphabetical: "Алфавит бойынша (A-Z)",
+    sortCheap: "Алдымен арзандары",
+    sortExpensive: "Алдымен қымбаттары",
+    // ЖАҢА ҚОСЫЛҒАН АУДАРМА
+    similarProducts: "Сізге мыналар да ұнауы мүмкін"
   },
   ru: {
-    search: "Поиск парфюма...",
+    search: "Поиск парфюма или бренда...",
     catalog: "Каталог",
     price: "Цена:",
     volume: "Объем:",
@@ -41,6 +46,11 @@ export const translations = {
     cartEmpty: "Ваша корзина пуста",
     total: "Итого:",
     checkout: "Оформить заказ",
-    delete: "Удалить"
+    delete: "Удалить",
+    sortAlphabetical: "По алфавиту (A-Z)",
+    sortCheap: "Сначала дешевые",
+    sortExpensive: "Сначала дорогие",
+    // ЖАҢА ҚОСЫЛҒАН АУДАРМА
+    similarProducts: "Вам также может понравиться"
   }
 }
