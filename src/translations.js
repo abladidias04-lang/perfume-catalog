@@ -6,9 +6,9 @@ export const translations = {
     volume: "Көлемі:",
     brand: "Бренд:",
     all: "Барлығы",
-    budget: "50к дейін",
-    medium: "50к - 100к",
-    premium: "Премиум",
+    range1: "7 000 - 9 800 ₸",
+    range2: "9 800 - 13 600 ₸",
+    range3: "15 400 - 21 500 ₸",
     any: "Кез келген",
     empty: "Ештеңе табылмады",
     loading: "Жүктелуде...",
@@ -24,7 +24,6 @@ export const translations = {
     sortCheap: "Алдымен арзандары",
     sortExpensive: "Алдымен қымбаттары",
     similarProducts: "Сізге мыналар да ұнауы мүмкін",
-    // ЖАҢА АУДАРМА
     loadMore: "Тағы көрсету"
   },
   ru: {
@@ -34,9 +33,9 @@ export const translations = {
     volume: "Объем:",
     brand: "Бренд:",
     all: "Все",
-    budget: "До 50к",
-    medium: "50к - 100к",
-    premium: "Премиум",
+    range1: "7 000 - 9 800 ₸",
+    range2: "9 800 - 13 600 ₸",
+    range3: "15 400 - 21 500 ₸",
     any: "Любой",
     empty: "Ничего не найдено",
     loading: "Загрузка...",
@@ -52,7 +51,6 @@ export const translations = {
     sortCheap: "Сначала дешевые",
     sortExpensive: "Сначала дорогие",
     similarProducts: "Вам также может понравиться",
-    // ЖАҢА АУДАРМА
     loadMore: "Показать еще"
   }
 }

@@ -98,16 +98,12 @@ export default function Home() {
   const hasActiveFilters = selectedBrands.length > 0 || selectedVolumes.length > 0 || priceFilter !== 'all'
 
   const filteredPerfumes = perfumes.filter(perfume => {
-    // ЖАҢА АҚЫЛДЫ ІЗДЕУ ЖҮЙЕСІ:
-    // Сұранысты сөздерге бөлеміз (мысалы, "Louis Vuitton" -> ["louis", "vuitton"])
+    // АҚЫЛДЫ ІЗДЕУ ЖҮЙЕСІ (LOUIS VUITTON AFTERNOON СИЯҚТЫ)
     const searchTerms = searchQuery.toLowerCase().split(' ').filter(Boolean)
-    // Парфюмнің брендін, атын және сипаттамасын бір мәтінге біріктіреміз
     const searchableText = `${perfume.brand || ''} ${perfume.name || ''} ${perfume.description || ''}`.toLowerCase()
-    
-    // Барлық іздеген сөздер осы мәтін ішінен табылуы шарт
     const matchesSearch = searchTerms.every(term => searchableText.includes(term))
     
-    // ЖАҢА БАҒА ФИЛЬТРЛЕРІ:
+    // БАҒА ДИАПАЗОНДАРЫ (СІЗ СҰРАҒАН)
     let matchesPrice = true
     if (priceFilter === 'range1') matchesPrice = perfume.price >= 7000 && perfume.price <= 9800
     if (priceFilter === 'range2') matchesPrice = perfume.price >= 9800 && perfume.price <= 13600
