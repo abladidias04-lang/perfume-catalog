@@ -25,11 +25,13 @@ export const translations = {
     sortExpensive: "Алдымен қымбаттары",
     similarProducts: "Сізге мыналар да ұнауы мүмкін",
     loadMore: "Тағы көрсету",
-    // ЖАҢА ҚОСЫЛҒАНДАР
     gender: "Кімге арналған:",
     men: "Мужской",
     women: "Женский",
-    unisex: "Унисекс"
+    unisex: "Унисекс",
+    // ЖАҢА: Баға түрлері
+    retail: "В розницу (1-19 дана)",
+    wholesale: "Оптом (20+ дана)"
   },
   ru: {
     search: "Поиск парфюма или бренда...",
@@ -57,10 +59,12 @@ export const translations = {
     sortExpensive: "Сначала дорогие",
     similarProducts: "Вам также может понравиться",
     loadMore: "Показать еще",
-    // ЖАҢА ҚОСЫЛҒАНДАР
     gender: "Для кого:",
     men: "Мужской",
     women: "Женский",
-    unisex: "Унисекс"
+    unisex: "Унисекс",
+    // ЖАҢА: Баға түрлері
+    retail: "В розницу (1-19 шт)",
+    wholesale: "Оптом (от 20 шт)"
   }
 }
