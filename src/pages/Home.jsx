@@ -139,8 +139,8 @@ export default function Home() {
     let matchesPrice = true
     const currentPrice = getDisplayPrice(perfume.price)
     if (priceFilter === 'range1') matchesPrice = currentPrice >= 7000 && currentPrice <= 9800
-    if (priceFilter === 'range2') matchesPrice = currentPrice >= 9800 && currentPrice <= 13600
-    if (priceFilter === 'range3') matchesPrice = currentPrice >= 15400 && currentPrice <= 21500
+    if (priceFilter === 'range2') matchesPrice = currentPrice >= 9800 && currentPrice <= 13800
+    if (priceFilter === 'range3') matchesPrice = currentPrice >= 15400 && currentPrice <= 24500
     
     let matchesVolume = true
     if (selectedVolumes.length > 0) matchesVolume = selectedVolumes.includes(perfume.volume)
