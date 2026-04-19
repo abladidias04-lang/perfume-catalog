@@ -14,8 +14,8 @@ export default function Home() {
   const [priceFilter, setPriceFilter] = useState('all')
   const [genderFilter, setGenderFilter] = useState('all')
   
-  // ЖАҢА: Баға түрі
-  const [priceType, setPriceType] = useState('retail')
+  // ЖӨНДЕЛДІ: Сайт ашылғанда бірден "Оптом" бағасы тұрады
+  const [priceType, setPriceType] = useState('wholesale')
   
   const [sortBy, setSortBy] = useState('alphabetical')
   const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false)
@@ -70,10 +70,8 @@ export default function Home() {
     }))
   }
 
-  // ЖАҢА: Бағаны есептеу функциясы (3000 тг қосу)
   const getDisplayPrice = (basePrice) => priceType === 'retail' ? basePrice + 3000 : basePrice;
 
-  // Себет сомасы жаңа бағамен есептеледі
   const cartTotal = cart.reduce((sum, item) => sum + (getDisplayPrice(item.price) * item.quantity), 0)
 
   const getCartWhatsAppUrl = () => {
@@ -185,7 +183,6 @@ export default function Home() {
         
         <div className="w-full md:hidden flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           
-          {/* ЖӨНДЕЛДІ: Мобильді нұсқада Оптом мен В розницу орны ауысты */}
           <div className="flex bg-gray-100 p-1 rounded-xl w-full mb-2">
             <button
               onClick={() => setPriceType('wholesale')}
@@ -340,7 +337,6 @@ export default function Home() {
           <div className="hidden md:flex bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6 justify-between items-center gap-4">
             <h1 className="text-2xl font-black whitespace-nowrap">{t.catalog} <span className="text-sm text-gray-500 font-medium ml-2">({sortedPerfumes.length})</span></h1>
             
-            {/* ЖӨНДЕЛДІ: Компьютер нұсқасында Оптом мен В розницу орны ауысты */}
             <div className="flex bg-gray-100 p-1 rounded-xl mx-auto">
               <button
                 onClick={() => setPriceType('wholesale')}
