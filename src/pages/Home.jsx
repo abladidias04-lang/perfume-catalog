@@ -14,12 +14,10 @@ export default function Home() {
   const [priceFilter, setPriceFilter] = useState('all')
   const [genderFilter, setGenderFilter] = useState('all')
   
-  // ЖӨНДЕЛДІ: Сайт ашылғанда бірден "Оптом" бағасы тұрады
   const [priceType, setPriceType] = useState('wholesale')
   
-  const [sortBy, setSortBy] = useState('alphabetical')
-  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState
-    (false)
+  const [sortBy, setSortBy] = useState('new')
+  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false)
   const [selectedPerfume, setSelectedPerfume] = useState(null)
   
   const [cart, setCart] = useState(() => {
@@ -154,12 +152,15 @@ export default function Home() {
   })
 
   const sortedPerfumes = [...filteredPerfumes].sort((a, b) => {
+    if (sortBy === 'new') {
+      return new Date(b.created_at) - new Date(a.created_at);
+    }
     const priceA = getDisplayPrice(a.price);
     const priceB = getDisplayPrice(b.price);
     if (sortBy === 'price-asc') return priceA - priceB;
     if (sortBy === 'price-desc') return priceB - priceA;
-    const nameA = a.name.toLowerCase();
-    const nameB = b.name.toLowerCase();
+    const nameA = (a.name || '').toLowerCase();
+    const nameB = (b.name || '').toLowerCase();
     return nameA.localeCompare(nameB);
   })
 
@@ -182,6 +183,7 @@ export default function Home() {
       
       <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full mt-4 sm:mt-8 mb-10 flex flex-col md:flex-row gap-6 items-start">
         
+        {/* МОБИЛЬДІ НҰСҚА - СҮЗГІ ЖӘНЕ СҰРЫПТАУ */}
         <div className="w-full md:hidden flex flex-col gap-3 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           
           <div className="flex bg-gray-100 p-1 rounded-xl w-full mb-2">
@@ -209,11 +211,14 @@ export default function Home() {
               {lang === 'kz' ? 'Фильтр' : 'Фильтры'}
             </button>
           </div>
+          
+          {/* СІЗ СҰРАҒАН ЖЕР: Мобильді сұрыптау мәзірі */}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block w-full p-2.5 outline-none font-medium"
           >
+            <option value="new">{lang === 'kz' ? 'Жаңа қосылғандар' : 'Сначала новые'}</option>
             <option value="alphabetical">{t.sortAlphabetical}</option>
             <option value="price-asc">{t.sortCheap}</option>
             <option value="price-desc">{t.sortExpensive}</option>
@@ -355,11 +360,14 @@ export default function Home() {
 
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-500">{lang === 'kz' ? 'Сұрыптау:' : 'Сортировка:'}</span>
+              
+              {/* КОМПЬЮТЕР НҰСҚАСЫ - СҰРЫПТАУ */}
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block p-2.5 outline-none font-medium cursor-pointer"
               >
+                <option value="new">{lang === 'kz' ? 'Жаңа қосылғандар' : 'Сначала новые'}</option>
                 <option value="alphabetical">{t.sortAlphabetical}</option>
                 <option value="price-asc">{t.sortCheap}</option>
                 <option value="price-desc">{t.sortExpensive}</option>
@@ -547,7 +555,7 @@ export default function Home() {
               )}
             </div>
             
-                       {cart.length > 0 && (
+            {cart.length > 0 && (
               <div className="p-6 border-t border-gray-100 bg-white">
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-bold text-gray-500">{t.total}</span>
@@ -564,3 +572,4 @@ export default function Home() {
     </div>
   )
 }
+
