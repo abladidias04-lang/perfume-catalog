@@ -18,7 +18,8 @@ export default function Home() {
   const [priceType, setPriceType] = useState('wholesale')
   
   const [sortBy, setSortBy] = useState('alphabetical')
-  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false)
+  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState
+    (false)
   const [selectedPerfume, setSelectedPerfume] = useState(null)
   
   const [cart, setCart] = useState(() => {
@@ -546,7 +547,7 @@ export default function Home() {
               )}
             </div>
             
-            {cart.length > 0 && (
+                       {cart.length > 0 && (
               <div className="p-6 border-t border-gray-100 bg-white">
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-bold text-gray-500">{t.total}</span>
@@ -558,3 +559,8 @@ export default function Home() {
               </div>
             )}
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
