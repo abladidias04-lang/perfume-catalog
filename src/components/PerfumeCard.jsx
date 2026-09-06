@@ -1,29 +1,45 @@
-export default function PerfumeCard({ perfume, onClick, priceType }) {
-  // ЖАҢА: Егер бөлшек (в розницу) болса, бағаға 3000 тг қосылады
-  const displayPrice = priceType === 'retail' ? perfume.price + 3000 : perfume.price;
+import React from 'react';
 
+export default function PerfumeCard({ perfume }) {
   return (
-    <div 
-      onClick={onClick}
-      className="group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col h-full hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1"
-    >
-      <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
-        <img src={perfume.image_url} alt={perfume.name} className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow flex flex-col justify-between">
+      <div className="relative w-full pt-[100%] bg-gray-50 overflow-hidden">
+        {perfume.image_url ? (
+          <img
+            src={perfume.image_url}
+            alt={perfume.name}
+            loading="lazy"
+            decoding="async"
+            className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          />
+        ) : (
+          <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center text-gray-300 text-sm">
+            Сурет жоқ
+          </div>
+        )}
       </div>
-      <div className="p-3 sm:p-4 flex flex-col flex-grow">
-        {perfume.brand && (
-          <p className="text-[10px] sm:text-xs font-black text-indigo-500 uppercase tracking-wider mb-1">
+
+      <div className="p-4 flex flex-col flex-grow justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">
             {perfume.brand}
           </p>
-        )}
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2 leading-tight mb-1">
-          {perfume.name}
-        </h3>
-        <p className="text-xs sm:text-sm text-gray-500 mb-2">{perfume.volume} мл</p>
-        <div className="mt-auto">
-          <p className="text-lg sm:text-xl font-black text-indigo-600">{displayPrice.toLocaleString('kk-KZ')} ₸</p>
+          <h3 className="text-base font-medium text-gray-900 line-clamp-1 mb-2">
+            {perfume.name}
+          </h3>
+          {perfume.description && (
+            <p className="text-xs text-gray-500 line-clamp-2 mb-3">
+              {perfume.description}
+            </p>
+          )}
+        </div>
+
+        <div className="pt-2 border-t border-gray-50 flex items-center justify-between">
+          <span className="text-base font-bold text-gray-900">
+            {perfume.price ? `${Number(perfume.price).toLocaleString()} ₸` : 'Бағасы көрсетілмеген'}
+          </span>
         </div>
       </div>
     </div>
-  )
+  );
 }
